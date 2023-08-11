@@ -4,9 +4,11 @@ import com.example.springboot.dto.UserDto;
 import com.example.springboot.entity.User;
 import com.example.springboot.repository.UserRepository;
 import com.example.springboot.service.UserService;
+import com.example.springboot.utils.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,31 +19,38 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = new User(userDto.getId(), userDto.getFirstName(), userDto.getLastName(), userDto.getEmail());
+        User user = UserMapper.mapToUser(userDto);
         User savedUser = repository.save(user);
-        UserDto savedUserDto = new UserDto(savedUser.getId(), savedUser.getFirstName(),savedUser.getLastName(),savedUser.getEmail());
+        UserDto savedUserDto = UserMapper.mapToUserDto(savedUser);
         return savedUserDto;
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         Optional<User> optionalUser = repository.findById(userId);
-        return optionalUser.get();
+        UserDto user = UserMapper.mapToUserDto(optionalUser.get());
+        return user;
     }
 
     @Override
-    public List<User> getAllUser() {
-        return repository.findAll();
+    public List<UserDto> getAllUser() {
+        List<UserDto> userDtoList = new ArrayList<>();
+        List<User> users = repository.findAll();
+        for(User user: users){
+            userDtoList.add(UserMapper.mapToUserDto(user));
+        }
+        return userDtoList;
     }
 
     @Override
-    public User updateUser(User user) {
-        User existingUser = repository.findById(user.getId()).get();
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setEmail(user.getEmail());
+    public UserDto updateUser(UserDto userDto) {
+        User existingUser = repository.findById(userDto.getId()).get();
+        existingUser.setFirstName(userDto.getFirstName());
+        existingUser.setLastName(userDto.getLastName());
+        existingUser.setEmail(userDto.getEmail());
         User updatedUser = repository.save(existingUser);
-        return updatedUser;
+        UserDto updatedUserDto = UserMapper.mapToUserDto(updatedUser);
+        return updatedUserDto;
     }
 
     @Override

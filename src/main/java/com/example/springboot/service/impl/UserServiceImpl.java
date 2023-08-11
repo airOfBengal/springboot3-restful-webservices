@@ -6,40 +6,44 @@ import com.example.springboot.repository.UserRepository;
 import com.example.springboot.service.UserService;
 import com.example.springboot.utils.UserMapper;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository repository;
+    private ModelMapper modelMapper;
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = UserMapper.mapToUser(userDto);
+        //User user = UserMapper.mapToUser(userDto);
+        User user = modelMapper.map(userDto, User.class);
         User savedUser = repository.save(user);
-        UserDto savedUserDto = UserMapper.mapToUserDto(savedUser);
+        //UserDto savedUserDto = UserMapper.mapToUserDto(savedUser);
+        UserDto savedUserDto = modelMapper.map(savedUser, UserDto.class);
         return savedUserDto;
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         Optional<User> optionalUser = repository.findById(userId);
-        UserDto user = UserMapper.mapToUserDto(optionalUser.get());
+        //UserDto user = UserMapper.mapToUserDto(optionalUser.get());
+        UserDto user = modelMapper.map(optionalUser.get(), UserDto.class);
         return user;
     }
 
     @Override
     public List<UserDto> getAllUser() {
-        List<UserDto> userDtoList = new ArrayList<>();
+
         List<User> users = repository.findAll();
-        for(User user: users){
-            userDtoList.add(UserMapper.mapToUserDto(user));
-        }
-        return userDtoList;
+        //return users.stream().map(UserMapper::mapToUserDto).collect(Collectors.toList());
+        return users.stream().map((user) -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -49,7 +53,8 @@ public class UserServiceImpl implements UserService {
         existingUser.setLastName(userDto.getLastName());
         existingUser.setEmail(userDto.getEmail());
         User updatedUser = repository.save(existingUser);
-        UserDto updatedUserDto = UserMapper.mapToUserDto(updatedUser);
+        //UserDto updatedUserDto = UserMapper.mapToUserDto(updatedUser);
+        UserDto updatedUserDto = modelMapper.map(updatedUser, UserDto.class);
         return updatedUserDto;
     }
 
